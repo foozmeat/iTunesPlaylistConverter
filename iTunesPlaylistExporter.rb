@@ -3,9 +3,6 @@
 #############################################################################
 # A script to convert and export m4a playlists to an SD Card
 #
-# usage: ./iTunesPlaylistExporter <playlist name> <output volume>
-#
-# TODO: sort the track list before work begins
 
 require 'rubygems'
 require 'bundler/setup'
@@ -79,6 +76,12 @@ playlist.tracks.each do |t|
   artist = matches[1]
   album = matches[2]
   source_track = matches[3]
+  convert_track = false
+  
+  # Is the track already an MP3?
+  if File.extname(source_filepath).casecmp(".mp3") != 0
+    convert_track = true
+  end
   
   # check to see if destination mp3 exists
   destination_track = File.basename(source_filepath, ".m4a") + ".mp3"
@@ -87,19 +90,22 @@ playlist.tracks.each do |t|
   
   destination_filepath = File.join(output_volume, m3u_filepath)
   
+  m3u_file.puts(m3u_filepath)
+  
   if !File.exist?(destination_filepath)
     FileUtils.mkdir_p(File.join(output_volume,destination_folder))
     
-    # puts "#{destination_filepath} doesn't exist...scheduling encoding".blue
-    p.process {
-      `ffmpeg -loglevel panic -i "#{source_filepath}" -q:a 2 "#{destination_filepath}"`
-      m3u_file.puts(m3u_filepath)
-      # puts "#{destination_filepath} finished".green
+    if convert_track
+      p.process {
+        `ffmpeg -loglevel panic -i "#{source_filepath}" -q:a 2 "#{destination_filepath}"`
+        pb.increment
+      }
+    else
+      FileUtils.cp(source_filepath, destination_filepath)
       pb.increment
-    }
+    end
   else
-    # puts "#{destination_filepath} exists...skipping".yellow
-    m3u_file.puts(m3u_filepath)
+    # File already exists at destination so don't do anything
     pb.increment
   end
 end
