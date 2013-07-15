@@ -8,7 +8,13 @@ This script should make it easy to fill an SD card with music and M3U playlists 
 Installation
 ------------
 
-	[sudo] bundle install
+This script needs ffmpeg installed and in your $PATH. The easiest way to do this is via homebrew. Otherwise you can grab a binary from [here](http://ffmpegmac.net/).
+
+	$ brew install ffmpeg
+
+Next install the scripts dependancies:
+
+	$ [sudo] bundle install
 
 Usage
 -----
